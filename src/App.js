@@ -330,7 +330,7 @@ Ext.define('CustomApp', {
 
     onScopeChange: function (tb) {
       var me = this;
-      //console.log('Scope changed');
+      console.log('Scope changed',tb);
 
       me.initiatives = null;
       me.features = null;
@@ -391,6 +391,7 @@ Ext.define('CustomApp', {
 
       Ext.create('Rally.data.WsapiDataStore', {
         model: 'Project',
+        limit : 'Infinity',
         autoLoad: true,
         fetch: true,
         listeners: {
@@ -401,7 +402,7 @@ Ext.define('CustomApp', {
     },
 
     _projectsLoaded: function (store, recs, success) {
-      //console.log('Projects loaded', recs);
+      // console.log('Projects loaded', recs, _.map(recs,function(r){return r.get("Name")}));
       var me         = this;
 
       me.projects    = {};
@@ -651,8 +652,8 @@ Ext.define('CustomApp', {
 
     addProject: function (projectId) {
       //console.log('Adding project', projectId);
-
       var me = this;
+      // console.log("projects", projectId,me.projects);
       var cls = Ext.isIE ? 'rotate rotate-ie' : 'rotate';
 
       var container = Ext.create('Ext.container.Container', {
