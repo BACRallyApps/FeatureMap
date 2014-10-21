@@ -338,7 +338,12 @@ Ext.define('CustomApp', {
       me.projects = null;
 
       me.removeAll(true);
-      me.loadData(tb);
+
+      if (_.isUndefined(me.piTypes))
+        me.addContent(tb);
+      else
+        // me.doit(scope);
+        me.loadData(tb);
     },
 
     loadData: function (tb) {
