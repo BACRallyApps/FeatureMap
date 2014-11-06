@@ -11,6 +11,12 @@ Ext.define('Rally.print.FeatureMap', {
     this.component = component;
   },
 
+  launch: function() {
+    console.log("launch");
+    // this.addContent();
+  },
+
+
   _getHtmlContent: function(dom) {
     var el = Ext.DomHelper.createDom({});
     var main = Ext.clone(dom.dom);
@@ -80,7 +86,15 @@ Ext.define('CustomApp', {
     },
 
     constructor: function (config) {
+      console.log("constructor");
       var me = this;
+      
+      if (_.keys(me.getSettings()).length > 0)
+        me.settings = me.getSettings() 
+      else
+        me.settings = me.config.defaultSettings;
+
+      console.log("settings",me.settings);
 
       this.callParent([config]);
       this.mixins.observable.constructor.call(this, config);
@@ -205,8 +219,11 @@ Ext.define('CustomApp', {
       if (!this.legendDlg) {
         var legend = [];
 
+        
         _.each(me.scheduleStates, function (state) {
-          legend.push(me._buildLegendEntry(state, me.getSetting('state-color-' + state.toLowerCase()) || 'white'));
+          // legend.push(me._buildLegendEntry(state, me.getSetting('state-color-' + state.toLowerCase()) || 'white'));
+          console.log("color class",me.settings[('state-color-' + state.toLowerCase())]);
+          legend.push(me._buildLegendEntry(state, me.settings[('state-color-' + state.toLowerCase())] || 'white'));
         }, this);
 
         legend.push(me._buildLegendEntry('', ''));
@@ -238,6 +255,9 @@ Ext.define('CustomApp', {
     },
 
     addContent: function(tb) {
+
+      console.log("addContent");
+
       var me = this;
 
       me.subscribe(me, Rally.Message.objectUpdate, me._onObjectUpdated, me);
@@ -245,15 +265,17 @@ Ext.define('CustomApp', {
       Ext.create('Rally.data.WsapiDataStore', {
         autoLoad: true,
         model: 'TypeDefinition',
-        filters: [{
+        filters: [ {
           property: 'TypePath',
           operator: '=',
           value: 'HierarchicalRequirement'
-        }],
+        } ],
         fetch: ['Attributes', 'ElementName', 'AllowedValues', 'StringValue'],
         listeners: {
-          load: function (store, recs) {
-            //console.dir(recs);
+          load: function (store, recs, success) {
+            // debugger;
+            console.log("TypeDefinition:", success, recs );
+
             Ext.Array.each(recs[0].get('Attributes'), function (attribute) {
               if (attribute.ElementName !== 'ScheduleState') { return; }
 
@@ -263,9 +285,8 @@ Ext.define('CustomApp', {
                   me.scheduleStates.push(value.StringValue);
                 }
               });
-
-              me.fireEvent('scheduleStatesLoaded', me.scheduleStates);
             });
+            me.fireEvent('scheduleStatesLoaded', me.scheduleStates);
           }
         }
       });
@@ -274,7 +295,11 @@ Ext.define('CustomApp', {
         var colors = {};
         var rules = [];
 
-        Ext.Object.each(me.getSettings(), function(k, v) {
+        console.log("settings",me.settings );
+
+        // Ext.Object.each(me.getSettings(), function(k, v) {
+        Ext.Object.each(me.settings, function(k, v) {
+          console.log(k,v);
           if (k.indexOf('state-color-') !== -1) {
             colors[k.replace('state-color-', '')] = v;
           }
@@ -287,6 +312,8 @@ Ext.define('CustomApp', {
             '}'
           );
         });
+
+        console.log("colors",colors,states);
 
         Ext.util.CSS.createStyleSheet(rules.join('\n'), 'generated');
       });
@@ -313,7 +340,7 @@ Ext.define('CustomApp', {
             me.piTypes = {};
 
             _.each(recs, function (type) {
-              //console.log('Found PI Type', type, type.get('Ordinal'), type.get('TypePath'));
+              // console.log('Found PI Type', type, type.get('Ordinal'), type.get('TypePath'));
               me.piTypes[type.get('Ordinal') + ''] = type;
             });
             me.onScopeChange(tb);
