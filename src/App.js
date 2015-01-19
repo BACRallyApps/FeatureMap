@@ -31,9 +31,10 @@ Ext.define('Rally.print.FeatureMap', {
       //console.log("Adding link", link);
       el.appendChild(link);
     });
+    console.log("#appCss",Ext.query("#appCss")[0]);
     el.appendChild(Ext.clone(Ext.query("#appCss")[0]));
     el.appendChild(main);
-    //console.log('Printing', el);
+    console.log('Printing', el);
     return el.innerHTML;
   },
 
@@ -264,6 +265,7 @@ Ext.define('CustomApp', {
 
       Ext.create('Rally.data.WsapiDataStore', {
         autoLoad: true,
+        limit : "Infinity",
         model: 'TypeDefinition',
         filters: [ {
           property: 'TypePath',
@@ -321,6 +323,7 @@ Ext.define('CustomApp', {
       Ext.create('Rally.data.WsapiDataStore', {
         autoLoad: true,
         remoteFilter: false,
+        limit : "Infinity",
         model: 'TypeDefinition',
         sorters: [{
           property: 'Ordinal',
@@ -396,6 +399,7 @@ Ext.define('CustomApp', {
 
       Ext.create('Rally.data.WsapiDataStore', {
         model: 'HierarchicalRequirement',
+        limit : "Infinity",
         autoLoad: true,
         fetch: ['ObjectID', 'FormattedID', 'Name', 'ScheduleState', 'PlanEstimate', 'Feature', 'Parent', 'Project', 'Blocked', 'BlockedReason', 'Iteration', 'StartDate', 'EndDate', 'AcceptedDate', 'Predecessors', 'Successors'],
         filters: [{
@@ -516,7 +520,8 @@ Ext.define('CustomApp', {
     },
 
     _storiesLoaded: function (store, recs, success) {
-      //console.log('Stories loaded', recs);
+      
+      console.log('Stories loaded', recs);
 
       var me       = this;
 

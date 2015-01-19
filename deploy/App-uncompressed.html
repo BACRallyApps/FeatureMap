@@ -40,9 +40,10 @@ Ext.define('Rally.print.FeatureMap', {
       //console.log("Adding link", link);
       el.appendChild(link);
     });
+    console.log("#appCss",Ext.query("#appCss")[0]);
     el.appendChild(Ext.clone(Ext.query("#appCss")[0]));
     el.appendChild(main);
-    //console.log('Printing', el);
+    console.log('Printing', el);
     return el.innerHTML;
   },
 
