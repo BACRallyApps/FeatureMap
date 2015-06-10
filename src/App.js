@@ -31,10 +31,10 @@ Ext.define('Rally.print.FeatureMap', {
       //console.log("Adding link", link);
       el.appendChild(link);
     });
-    console.log("#appCss",Ext.query("#appCss")[0]);
+    // console.log("#appCss",Ext.query("#appCss")[0]);
     el.appendChild(Ext.clone(Ext.query("#appCss")[0]));
     el.appendChild(main);
-    console.log('Printing', el);
+    // console.log('Printing', el);
     return el.innerHTML;
   },
 
@@ -87,7 +87,7 @@ Ext.define('CustomApp', {
     },
 
     constructor: function (config) {
-      console.log("constructor");
+      // console.log("constructor");
       var me = this;
       
       if (_.keys(me.getSettings()).length > 0)
@@ -95,7 +95,7 @@ Ext.define('CustomApp', {
       else
         me.settings = me.config.defaultSettings;
 
-      console.log("settings",me.settings);
+      // console.log("settings",me.settings);
 
       this.callParent([config]);
       this.mixins.observable.constructor.call(this, config);
@@ -257,7 +257,7 @@ Ext.define('CustomApp', {
 
     addContent: function(tb) {
 
-      console.log("addContent");
+      // console.log("addContent");
 
       var me = this;
 
@@ -276,7 +276,7 @@ Ext.define('CustomApp', {
         listeners: {
           load: function (store, recs, success) {
             // debugger;
-            console.log("TypeDefinition:", success, recs );
+            // console.log("TypeDefinition:", success, recs );
 
             Ext.Array.each(recs[0].get('Attributes'), function (attribute) {
               if (attribute.ElementName !== 'ScheduleState') { return; }
@@ -297,11 +297,11 @@ Ext.define('CustomApp', {
         var colors = {};
         var rules = [];
 
-        console.log("settings",me.settings );
+        // console.log("settings",me.settings );
 
         // Ext.Object.each(me.getSettings(), function(k, v) {
         Ext.Object.each(me.settings, function(k, v) {
-          console.log(k,v);
+          // console.log(k,v);
           if (k.indexOf('state-color-') !== -1) {
             colors[k.replace('state-color-', '')] = v;
           }
@@ -315,7 +315,7 @@ Ext.define('CustomApp', {
           );
         });
 
-        console.log("colors",colors,states);
+        // console.log("colors",colors,states);
 
         Ext.util.CSS.createStyleSheet(rules.join('\n'), 'generated');
       });
@@ -384,6 +384,7 @@ Ext.define('CustomApp', {
 
       Ext.create('Rally.data.WsapiDataStore', {
         model: me.piTypes['0'].get('TypePath'),
+        limit : "Infinity",
         autoLoad: true,
         fetch: ['ObjectID', 'FormattedID', 'Name', 'Value', 'Parent', 'Project', 'UserStories', 'Children', 'PreliminaryEstimate', 'DirectChildrenCount', 'LeafStoryPlanEstimateTotal', 'DisplayColor'],
         filters: tb.getQueryFilter(),
@@ -494,6 +495,7 @@ Ext.define('CustomApp', {
       }
 
       Ext.create('Rally.data.WsapiDataStore', {
+        limit : "Infinity",
         model: me.piTypes['1'].get('TypePath'),
         autoLoad: true,
         filters: filter,
