@@ -1,5 +1,10 @@
 var Ext = window.Ext4 || window.Ext;
 
+var app = null;
+
+// Remeber to change the reference in generated file to the following so that the older sdk is used.
+//     <script type="text/javascript" src="//rally1.rallydev.com/apps/2.0rc3/sdk.js?wsapiVersion=1.43"></script>
+
 Ext.define('Rally.print.FeatureMap', {
   requires: ['Ext.XTemplate'],
   extend: 'Rally.ui.plugin.print.Print',
@@ -10,12 +15,6 @@ Ext.define('Rally.print.FeatureMap', {
     this.callParent(arguments);
     this.component = component;
   },
-
-  launch: function() {
-    console.log("launch");
-    // this.addContent();
-  },
-
 
   _getHtmlContent: function(dom) {
     var el = Ext.DomHelper.createDom({});
@@ -49,6 +48,7 @@ Ext.define('Rally.print.FeatureMap', {
 
 Ext.define('CustomApp', {
     extend: 'Rally.app.TimeboxScopedApp',
+    // extend: 'Rally.app.App',
     mixins: {
         observable: 'Ext.util.Observable',
         maskable: 'Rally.ui.mask.Maskable'
@@ -86,8 +86,35 @@ Ext.define('CustomApp', {
       type: 'vbox'
     },
 
+    // launch: function() {
+    //   var me = this;
+    //   console.log("launch");
+    //   console.log('Scope',me.getContext().getTimeboxScope());
+    //   var timebox = me.getContext().getTimeboxScope();
+
+    //   if (_.isUndefined(timebox)) {
+
+    //     me.add( Ext.create("Rally.ui.combobox.ReleaseComboBox",{
+    //       listeners : {
+    //         select : function(a,release,c) {
+    //           console.log(this.getQueryFilter());
+
+    //           // me.getContext().setTimeboxScope(release);
+    //           // me.onScopeChange(me.getContext().getTimeboxScope());
+    //         }
+    //       }
+    //     }));
+
+    //   } else {
+    //     me.onScopeChange(timebox.getRecord());
+    //   }
+
+    //   // if 
+    // },
+
+
     constructor: function (config) {
-      // console.log("constructor");
+      console.log("constructor");
       var me = this;
       
       if (_.keys(me.getSettings()).length > 0)
@@ -222,8 +249,6 @@ Ext.define('CustomApp', {
 
         
         _.each(me.scheduleStates, function (state) {
-          // legend.push(me._buildLegendEntry(state, me.getSetting('state-color-' + state.toLowerCase()) || 'white'));
-          console.log("color class",me.settings[('state-color-' + state.toLowerCase())]);
           legend.push(me._buildLegendEntry(state, me.settings[('state-color-' + state.toLowerCase())] || 'white'));
         }, this);
 
@@ -252,35 +277,34 @@ Ext.define('CustomApp', {
     },
 
     addToContainer: function (con) {
-      this.add(con);
+      if (_.isUndefined(this.panel) || _.isNull(this.panel)) {
+        this.panel = Ext.create('Ext.panel.Panel');
+        this.add(this.panel);
+      }
+      this.panel.add(con);
     },
 
     addContent: function(tb) {
-
-      // console.log("addContent");
 
       var me = this;
 
       me.subscribe(me, Rally.Message.objectUpdate, me._onObjectUpdated, me);
 
       Ext.create('Rally.data.WsapiDataStore', {
-        autoLoad: true,
         limit : "Infinity",
+        autoLoad: true,
         model: 'TypeDefinition',
-        filters: [ {
+        filters: [{
           property: 'TypePath',
           operator: '=',
           value: 'HierarchicalRequirement'
-        } ],
+        }],
         fetch: ['Attributes', 'ElementName', 'AllowedValues', 'StringValue'],
         listeners: {
           load: function (store, recs, success) {
-            // debugger;
-            // console.log("TypeDefinition:", success, recs );
 
             Ext.Array.each(recs[0].get('Attributes'), function (attribute) {
               if (attribute.ElementName !== 'ScheduleState') { return; }
-
               me.scheduleStates = [];
               Ext.Array.each(attribute.AllowedValues, function (value) {
                 if (value.StringValue) {
@@ -297,11 +321,7 @@ Ext.define('CustomApp', {
         var colors = {};
         var rules = [];
 
-        // console.log("settings",me.settings );
-
-        // Ext.Object.each(me.getSettings(), function(k, v) {
         Ext.Object.each(me.settings, function(k, v) {
-          // console.log(k,v);
           if (k.indexOf('state-color-') !== -1) {
             colors[k.replace('state-color-', '')] = v;
           }
@@ -314,8 +334,6 @@ Ext.define('CustomApp', {
             '}'
           );
         });
-
-        // console.log("colors",colors,states);
 
         Ext.util.CSS.createStyleSheet(rules.join('\n'), 'generated');
       });
@@ -343,7 +361,6 @@ Ext.define('CustomApp', {
             me.piTypes = {};
 
             _.each(recs, function (type) {
-              // console.log('Found PI Type', type, type.get('Ordinal'), type.get('TypePath'));
               me.piTypes[type.get('Ordinal') + ''] = type;
             });
             me.onScopeChange(tb);
@@ -353,21 +370,25 @@ Ext.define('CustomApp', {
       });
 
       me.on('load', function (projects, initiatives, features, stories) {
-        //console.log('loaded');
         me._onLoad(projects, initiatives, features, stories);
       });
     },
 
     onScopeChange: function (tb) {
       var me = this;
+      app = this;
+
       console.log('Scope changed',tb);
+
+      if (!_.isUndefined(this.panel)&&!_.isNull(this.panel))
+        this.panel.removeAll(true);
 
       me.initiatives = null;
       me.features = null;
       me.stories = null;
       me.projects = null;
 
-      me.removeAll(true);
+      // me.removeAll(true);
 
       if (_.isUndefined(me.piTypes))
         me.addContent(tb);
@@ -574,7 +595,6 @@ Ext.define('CustomApp', {
       var me = this;
 
       me.hideMask();
-      //console.log(me);
 
       me.projectsByStory      = {};
       me.projectsByFeature    = {};
@@ -858,6 +878,8 @@ Ext.define('CustomApp', {
 
       container.add(storyContainer);
 
+      // console.log(_.map(me.storyRecs,function(s){return s.raw.Predecessors.length}));
+
       Ext.Array.each(me.storyRecs, function (story) {
         var storyId = story.data.ObjectID;
         var parentId = Rally.util.Ref.getOidFromRef(story.get('Feature')._ref);
@@ -963,7 +985,7 @@ Ext.define('CustomApp', {
           }
         }
       }
-
+      // console.log(data,data.pred_succ);
       return data;
     },
 
@@ -1081,7 +1103,7 @@ Ext.define('CustomApp', {
       var dataFn;
 
       fetchF = ['ObjectID', 'FormattedID', 'Name', 'Value', 'Parent', 'Project', 'UserStories', 'Children', 'PreliminaryEstimate', 'DirectChildrenCount', 'LeafStoryPlanEstimateTotal', 'DisplayColor'];
-      fetchS = ['ObjectID', 'FormattedID', 'Name', 'ScheduleState', 'PlanEstimate', 'Feature', 'Parent', 'Project', 'Blocked', 'BlockedReason', 'Iteration', 'StartDate', 'EndDate', 'AcceptedDate', 'Predecessor', 'Successor'];
+      fetchS = ['ObjectID', 'FormattedID', 'Name', 'ScheduleState', 'PlanEstimate', 'Feature', 'Parent', 'Project', 'Blocked', 'BlockedReason', 'Iteration', 'StartDate', 'EndDate', 'AcceptedDate', 'Predecessors', 'Successors'];
 
       if (record.get('_type').toLowerCase().indexOf('portfolioitem') !== -1) {
         fetch = fetchF;
