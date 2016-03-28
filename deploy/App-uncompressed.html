@@ -3,13 +3,16 @@
 <head>
     <title>FeatureMap</title>
 
-    <script type="text/javascript" src="/apps/2.0rc3/sdk.js?wsapiVersion=1.43"></script>
+    <script type="text/javascript" src="/apps/2.0rc3/sdk.js"></script>
 
     <script type="text/javascript">
         Rally.onReady(function () {
                 var Ext = window.Ext4 || window.Ext;
 
 var app = null;
+
+// Remeber to change the reference in generated file to the following so that the older sdk is used.
+//     <script type="text/javascript" src="//rally1.rallydev.com/apps/2.0rc3/sdk.js?wsapiVersion=1.43"></script>
 
 Ext.define('Rally.print.FeatureMap', {
   requires: ['Ext.XTemplate'],
@@ -1233,6 +1236,12 @@ if(f[a]("text")){for(g.text=f.text;h.firstChild;)h.removeChild(h.firstChild);for
 }
 .story {
   width: 150px;
+}
+.feature {
+  max-width: 250px;
+}
+.initiative {
+  max-width: 500px;
 }
 /*
 .story.state-defined {

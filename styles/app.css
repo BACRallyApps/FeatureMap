@@ -69,6 +69,14 @@ html {
   width: 150px;
 }
 
+.feature {
+    max-width: 250px;
+}
+
+.initiative {
+    max-width: 500px;
+}
+
 /*
 .story.state-defined {
   background-color: #F5F5F5 !important;
